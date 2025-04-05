@@ -142,7 +142,7 @@ async def query_collection(chat_message: ChatMessage):
         data = {
             "collection_id": chat_message.collection_id,
             "request_query": chat_message.message,
-            "model": "llama-3.3-70b"
+            "model": "meta-llama/llama-4-scout-17b-16e-instruct"
         }
         
         print(f"Sending request to Wetro with data: {data}")
