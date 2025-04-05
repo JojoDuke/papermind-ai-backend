@@ -176,8 +176,8 @@ async def dodo_webhook(request: Request):
 
         if payload.get("type") == "payment.succeeded":
             print("Payment succeeded detected!")
-            # Here you can send your message (e.g., to Supabase, Discord, DB, etc.)
-            # Example: send_message(payload["data"]) or whatever your logic is
+            response = supabase.table("users").update({"credits_remaining": 5}).eq("email", "jojoamankwa@gmail.com").execute()
+            print("Supabase update response:", response)
 
     except Exception as e:
         print("Error parsing webhook payload:", e)
