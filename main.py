@@ -166,9 +166,7 @@ async def query_collection(chat_message: ChatMessage):
 
 @app.post("/webhook/dodo-payments")
 async def handle_webhook(request: Request):
-    print("✅ Webhook endpoint was hit!")
-
+    print("Webhook endpoint was hit!")
     body_bytes = await request.body()
-    print("📦 Raw body:", body_bytes.decode())
-
+    print("Raw body:", body_bytes.decode())
     return {"status": "ok"}
