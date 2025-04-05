@@ -4,7 +4,8 @@ from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv
-import uuid  # Add import for UUID
+import uuid 
+import json
 import hmac
 import hashlib
 from supabase import create_client, Client
