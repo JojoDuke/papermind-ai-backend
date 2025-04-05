@@ -165,8 +165,20 @@ async def query_collection(chat_message: ChatMessage):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/webhook/dodo-payments")
-async def handle_webhook(request: Request):
+async def dodo_webhook(request: Request):
+    raw_body = await request.body()
     print("Webhook endpoint was hit!")
-    body_bytes = await request.body()
-    print("Raw body:", body_bytes.decode())
+
+    try:
+        payload = json.loads(raw_body)
+        #print("Raw body:", payload)
+
+        if payload.get("type") == "payment.succeeded":
+            print("Payment succeeded detected!")
+            # Here you can send your message (e.g., to Supabase, Discord, DB, etc.)
+            # Example: send_message(payload["data"]) or whatever your logic is
+
+    except Exception as e:
+        print("Error parsing webhook payload:", e)
+
     return {"status": "ok"}
