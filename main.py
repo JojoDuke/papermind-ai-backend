@@ -172,14 +172,28 @@ async def dodo_webhook(request: Request):
 
     try:
         payload = json.loads(raw_body)
-        #print("Raw body:", payload)
+        print("Raw body:", payload)
 
         if payload.get("type") == "payment.succeeded":
             print("Payment succeeded detected!")
-            response = supabase.table("users").update({"credits_remaining": 5}).eq("email", "jojoamankwa@gmail.com").execute()
+            
+            # Extract user ID from metadata
+            user_id = payload.get("metadata", {}).get("user_id")
+            if not user_id:
+                print("No user_id found in payment metadata")
+                return {"status": "error", "message": "No user_id in metadata"}
+
+            # Update user's subscription status and credits
+            response = supabase.table("users").update({
+                "credits_remaining": 100,  # Reset credits to 100
+                "is_premium": True
+            }).eq("id", user_id).execute()
+            
             print("Supabase update response:", response)
+            return {"status": "ok"}
 
     except Exception as e:
-        print("Error parsing webhook payload:", e)
+        print("Error processing webhook:", e)
+        return {"status": "error", "message": str(e)}
 
     return {"status": "ok"}
