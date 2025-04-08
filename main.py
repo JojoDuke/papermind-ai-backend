@@ -169,34 +169,44 @@ async def query_collection(chat_message: ChatMessage):
 @app.post("/webhook/dodo-payments")
 async def dodo_webhook(request: Request):
     raw_body = await request.body()
-    print("Webhook endpoint was hit!")
+    print("\n=== Webhook Debug Info ===")
+    print("1. Webhook endpoint was hit!")
+    
+    # Print all headers
+    headers = dict(request.headers)
+    print("2. Request Headers:", headers)
 
     try:
         payload = json.loads(raw_body)
-        print("Raw body:", payload)
+        print("3. Raw body:", payload)
+        print("4. Payment Type:", payload.get("type"))
+        print("5. Payment Data:", payload.get("data", {}))
 
         if payload.get("type") == "payment.succeeded":
-            print("Payment succeeded detected!")
+            print("6. Payment succeeded detected!")
             
             # Get user ID from metadata
             metadata = payload.get("data", {}).get("metadata", {})
+            print("7. Metadata received:", metadata)
+            
             user_id = metadata.get("user_id")
-            print(f"User ID from metadata: {user_id}")
+            print("8. User ID from metadata:", user_id)
 
             if not user_id:
-                print("No user_id found in metadata")
+                print("9. No user_id found in metadata")
                 return {"status": "error", "message": "No user_id in metadata"}
 
             # Update user's subscription status and credits
+            print("10. Attempting to update user:", user_id)
             response = supabase.table("users").update({
                 "credits_remaining": 100,  # Reset credits to 100
                 "is_premium": True
             }).eq("id", user_id).execute()
             
-            print("Supabase update response:", response)
+            print("11. Supabase update response:", response)
 
         return {"status": "ok"}
 
     except Exception as e:
-        print("Error processing webhook:", e)
+        print("ERROR: Webhook processing failed:", str(e))
         return {"status": "error", "message": str(e)}
