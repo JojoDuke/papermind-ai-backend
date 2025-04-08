@@ -212,23 +212,30 @@ async def dodo_webhook(request: Request):
 @app.post("/create-payment")
 async def create_payment(request: CreatePaymentRequest):
     try:
-        # Create payment session with Dodo Payments
-        payment = dodo_client.payments.create(
-            product_cart=[{
-                "product_id": "pdt_idWXm8RKDDzZ5nnMMDyLo",
-                "quantity": 1,
-            }],
+        # Create subscription with Dodo Payments
+        subscription = dodo_client.subscriptions.create(
+            product_id="pdt_idWXm8RKDDzZ5nnMMDyLo",
+            quantity=1,
+            customer={
+                "metadata": {
+                    "user_id": request.user_id
+                }
+            },
+            billing={
+                "currency": "USD"
+            },
             metadata={
                 "user_id": request.user_id
             },
-            redirect_url="http://localhost:3000/dashboard"
+            return_url="http://localhost:3000/dashboard",
+            payment_link=True
         )
         
         return {
             "success": True,
-            "payment_url": payment.checkout_url
+            "payment_url": subscription.payment_link
         }
         
     except Exception as e:
-        print("Error creating payment:", e)
+        print("Error creating subscription:", e)
         raise HTTPException(status_code=500, detail=str(e))
