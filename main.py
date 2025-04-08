@@ -175,60 +175,25 @@ async def dodo_webhook(request: Request):
         payload = json.loads(raw_body)
         print("Raw body:", payload)
 
-        event_type = payload.get("type")
-        print(f"Processing event type: {event_type}")
-
-        if event_type == "payment.succeeded":
+        if payload.get("type") == "payment.succeeded":
             print("Payment succeeded detected!")
             
-            # Get the reference ID from the payment data
-            payment_data = payload.get("data", {})
-            reference_id = payment_data.get("reference_id")
-            if not reference_id:
-                print("No reference_id found in payment data")
-                return {"status": "error", "message": "No reference_id found"}
+            # Get user ID from metadata
+            metadata = payload.get("data", {}).get("metadata", {})
+            user_id = metadata.get("user_id")
+            print(f"User ID from metadata: {user_id}")
 
-            try:
-                # Extract session_id and user_id from reference_id
-                session_id, user_id = reference_id.split('_')
-                print(f"Extracted session_id: {session_id}, user_id: {user_id}")
-            except ValueError:
-                print("Invalid reference_id format")
-                return {"status": "error", "message": "Invalid reference_id format"}
-
-            # Verify the payment session exists and matches the user
-            session_response = supabase.table("payment_sessions").select("*").eq("id", session_id).eq("user_id", user_id).single().execute()
-            if session_response.error or not session_response.data:
-                print("Error verifying payment session:", session_response.error if session_response.error else "Session not found")
-                return {"status": "error", "message": "Invalid payment session"}
+            if not user_id:
+                print("No user_id found in metadata")
+                return {"status": "error", "message": "No user_id in metadata"}
 
             # Update user's subscription status and credits
-            user_update = supabase.table("users").update({
+            response = supabase.table("users").update({
                 "credits_remaining": 100,  # Reset credits to 100
-                "is_premium": True,        # Set premium status
-                "subscription_status": "active",
-                "subscription_updated_at": datetime.datetime.utcnow().isoformat()
+                "is_premium": True
             }).eq("id", user_id).execute()
             
-            # Update the payment session
-            session_update = supabase.table("payment_sessions").update({
-                "status": "completed",
-                "updated_at": datetime.datetime.utcnow().isoformat(),
-                "payment_intent_id": payment_data.get("payment_id"),
-                "amount": payment_data.get("total_amount"),
-                "currency": payment_data.get("currency")
-            }).eq("id", session_id).execute()
-            
-            print("User update response:", user_update)
-            print("Session update response:", session_update)
-            
-        elif event_type == "subscription.renewed":
-            print("Subscription renewed detected!")
-            # Handle subscription renewal if needed
-            
-        elif event_type == "subscription.active":
-            print("Subscription activated detected!")
-            # Handle subscription activation if needed
+            print("Supabase update response:", response)
 
         return {"status": "ok"}
 
