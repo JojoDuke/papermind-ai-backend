@@ -67,9 +67,6 @@ class SubscriptionWebhook(BaseModel):
     event: str
     data: dict
 
-class CreatePaymentRequest(BaseModel):
-    user_id: str
-
 @app.post("/process-pdf")
 async def process_pdf(data: PDFUploadData):
     try:
@@ -209,33 +206,3 @@ async def dodo_webhook(request: Request):
         print("Error processing webhook:", e)
         return {"status": "error", "message": str(e)}
 
-@app.post("/create-payment")
-async def create_payment(request: CreatePaymentRequest):
-    try:
-        # Create subscription with Dodo Payments
-        subscription = dodo_client.subscriptions.create(
-            product_id="pdt_idWXm8RKDDzZ5nnMMDyLo",
-            quantity=1,
-            customer={
-                "metadata": {
-                    "user_id": request.user_id
-                }
-            },
-            billing={
-                "currency": "USD"
-            },
-            metadata={
-                "user_id": request.user_id
-            },
-            return_url="http://localhost:3000/dashboard",
-            payment_link=True
-        )
-        
-        return {
-            "success": True,
-            "payment_url": subscription.payment_link
-        }
-        
-    except Exception as e:
-        print("Error creating subscription:", e)
-        raise HTTPException(status_code=500, detail=str(e))
