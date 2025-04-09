@@ -35,7 +35,13 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000","http://usepapermind.com/"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://usepapermind.com",
+        "https://www.usepapermind.com",
+        "http://usepapermind.com",
+        "http://www.usepapermind.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
