@@ -10,7 +10,6 @@ import hmac
 import hashlib
 from supabase import create_client, Client
 import datetime
-from dodopayments import DodoPayments
 
 # Load environment variables from .env file
 load_dotenv()
@@ -18,11 +17,6 @@ load_dotenv()
 # Initialize Supabase client with service role key
 supabase_url = os.getenv("SUPABASE_URL")
 service_key = os.getenv("SUPABASE_SERVICE_KEY")
-
-# Initialize Dodo Payments client
-dodo_client = DodoPayments(
-    bearer_token=os.getenv("DODO_PAYMENTS_API_KEY")
-)
 
 if not supabase_url or not service_key:
     raise ValueError("Missing Supabase configuration. Please check your .env file.")
